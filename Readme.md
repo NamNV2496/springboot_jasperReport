@@ -27,3 +27,11 @@ choose a template
 ## Step 5: export to file
 
 ![img_7.png](img/img_7.png)
+
+curl
+
+	GET curl --location --request GET 'http://localhost:8080/test'
+
+the output folder: `/out-put/`
+
+	example: `/out-put/test.pdf`
