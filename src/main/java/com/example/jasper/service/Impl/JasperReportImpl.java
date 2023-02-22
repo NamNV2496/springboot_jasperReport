@@ -2,8 +2,12 @@ package com.example.jasper.service.Impl;
 
 import com.example.jasper.domain.Customer;
 import com.example.jasper.service.JasperReportService;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -16,6 +20,8 @@ import java.util.Map;
 @Component
 @Slf4j
 public class JasperReportImpl implements JasperReportService {
+    @Value("classpath:image/logo.png")
+    Resource resourceFile;
 
     @Override
     public JasperReport generateReport(Customer customer) {
@@ -32,13 +38,19 @@ public class JasperReportImpl implements JasperReportService {
         return null;
     }
 
+    @SneakyThrows
     @Override
     public void exportReport(Customer customer) {
         JasperPrint jasperPrint = new JasperPrint();
         try {
+
+            InputStream logoInputStream = resourceFile.getInputStream();
+
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("fullName", customer.getFullName());
             parameters.put("telephone", customer.getTelephone());
+            // inset image
+            parameters.put("logo", logoInputStream);
 
             jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, new JREmptyDataSource());
         } catch (JRException ex) {
