@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -40,7 +43,7 @@ public class JasperReportImpl implements JasperReportService {
 
     @SneakyThrows
     @Override
-    public void exportReport(Customer customer) {
+    public void exportReport(Customer customer, List<Object> dataSource) {
         JasperPrint jasperPrint = new JasperPrint();
         try {
 
@@ -52,7 +55,23 @@ public class JasperReportImpl implements JasperReportService {
             // inset image
             parameters.put("logo", logoInputStream);
 
-            jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, new JREmptyDataSource());
+            JRDataSource dataSource1 = new JRBeanCollectionDataSource(dataSource);
+//            Way 1: empty dataSource
+//            jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, new JREmptyDataSource());
+//            WAY 2: dataSource in memory: data will be saved in database and jrxml file will load it from memory
+            jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, dataSource1);
+//            way 3: load from database => modify jrxml with <queryString>
+//            // Create a connection to the database
+//            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase", "root", "password");
+//
+//            // Create a statement to execute the SQL query
+//            Statement stmt = conn.createStatement();
+//            ResultSet rs = stmt.executeQuery("SELECT * FROM employees");
+//
+//            // Create a JRResultSetDataSource using the ResultSet
+//            JRResultSetDataSource dataSource1 = new JRResultSetDataSource(rs);
+//            jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, dataSource1);
+
         } catch (JRException ex) {
             log.error(JasperReportImpl.class.getName());
         }

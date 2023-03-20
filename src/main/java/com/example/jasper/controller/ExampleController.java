@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class ExampleController {
@@ -14,6 +17,8 @@ public class ExampleController {
     @GetMapping("/test")
     public void test() {
         Customer customer = Customer.builder().fullName("Nguyễn Văn Nam").telephone("09342834433").build();
-        jasperReportService.exportReport(customer);
+        List<Object> dataSource = new ArrayList<>();
+        dataSource.add(Customer.builder().fullName("datasource tesst").build());
+        jasperReportService.exportReport(customer, dataSource);
     }
 }
