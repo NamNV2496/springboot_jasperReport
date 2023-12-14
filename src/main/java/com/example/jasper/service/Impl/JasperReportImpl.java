@@ -2,20 +2,19 @@ package com.example.jasper.service.Impl;
 
 import com.example.jasper.domain.Customer;
 import com.example.jasper.service.JasperReportService;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.HtmlExporter;
+import net.sf.jasperreports.export.Exporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +25,8 @@ public class JasperReportImpl implements JasperReportService {
     @Value("classpath:image/logo.png")
     Resource resourceFile;
 
-    @Override
-    public JasperReport generateReport(Customer customer) {
+
+    private JasperReport generateReport() {
         try {
             InputStream exampleReportStream
                     = getClass().getResourceAsStream("/jrxml/template.jrxml");
@@ -48,7 +47,6 @@ public class JasperReportImpl implements JasperReportService {
         try {
 
             InputStream logoInputStream = resourceFile.getInputStream();
-
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("fullName", customer.getFullName());
             parameters.put("telephone", customer.getTelephone());
@@ -59,7 +57,7 @@ public class JasperReportImpl implements JasperReportService {
 //            Way 1: empty dataSource
 //            jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, new JREmptyDataSource());
 //            WAY 2: dataSource in memory: data will be saved in database and jrxml file will load it from memory
-            jasperPrint = JasperFillManager.fillReport(generateReport(customer), parameters, dataSource1);
+            jasperPrint = JasperFillManager.fillReport(this.generateReport(), parameters, dataSource1);
 //            way 3: load from database => modify jrxml with <queryString>
 //            // Create a connection to the database
 //            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase", "root", "password");
@@ -109,5 +107,27 @@ public class JasperReportImpl implements JasperReportService {
 //        } catch (JRException ex) {
 //            log.error(JasperReportImpl.class.getName());
 //        }
+    }
+
+    @SneakyThrows
+    @Override
+    public byte[] exportReportHTML(Customer customer, List<Object> dataSource) {
+
+        InputStream logoInputStream = resourceFile.getInputStream();
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("fullName", customer.getFullName());
+        parameters.put("telephone", customer.getTelephone());
+        // inset image
+        parameters.put("logo", logoInputStream);
+
+        JRDataSource dataSource1 = new JRBeanCollectionDataSource(dataSource);
+        JasperPrint jasperPrint = JasperFillManager.fillReport(this.generateReport(), parameters, dataSource1);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Exporter exporter = new HtmlExporter();
+        exporter.setExporterOutput(new SimpleHtmlExporterOutput(out));
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+        exporter.exportReport();
+        return out.toByteArray();
     }
 }

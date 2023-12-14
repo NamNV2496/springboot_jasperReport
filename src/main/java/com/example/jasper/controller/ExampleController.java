@@ -14,11 +14,19 @@ import java.util.List;
 public class ExampleController {
     private final JasperReportService jasperReportService;
 
-    @GetMapping("/test")
-    public void test() {
+    @GetMapping("/testPDF")
+    public void testPDF() {
         Customer customer = Customer.builder().fullName("Nguyễn Văn Nam").telephone("09342834433").build();
         List<Object> dataSource = new ArrayList<>();
         dataSource.add(Customer.builder().fullName("datasource tesst").build());
         jasperReportService.exportReport(customer, dataSource);
+    }
+
+    @GetMapping("/testHtml")
+    public byte[] testHtml() {
+        Customer customer = Customer.builder().fullName("Nguyễn Văn Nam").telephone("09342834433").build();
+        List<Object> dataSource = new ArrayList<>();
+        dataSource.add(Customer.builder().fullName("datasource tesst").build());
+        return jasperReportService.exportReportHTML(customer, dataSource);
     }
 }

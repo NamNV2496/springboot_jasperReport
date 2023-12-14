@@ -125,6 +125,8 @@ However, this query is not used when using a JRBeanCollectionDataSource. Instead
 
 ## with `JRResultSetDataSource` fill in
 
+that way will access DB and get result and fill it into jrxml
+
 ```java
 // Create a connection to the database
 Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydatabase", "root", "password");
@@ -205,3 +207,8 @@ JRResultSetDataSource dataSource = new JRResultSetDataSource(rs);
 ```
 
 
+# Gen HTML
+
+```
+curl --location 'http://localhost:8080/testHtml'
+```
